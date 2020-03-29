@@ -6,7 +6,7 @@ namespace Functional.Maybe
 	public static class MaybeAsync
 	{
 		/// <summary>
-		/// Flips Maybe and Task: instead of having Maybe<Task<T>>> (as in case of Select) we get Task<Maybe<T>> and have possibility to await on it.
+		/// Flips Maybe and Task: instead of having Maybe&lt;Task&lt;T&gt;&gt; (as in case of Select) we get Task&lt;Maybe&lt;T&gt;&gt; and have possibility to await on it.
 		/// </summary>
 		/// <typeparam name="T">source type</typeparam>
 		/// <typeparam name="TR">async result type</typeparam>
@@ -30,6 +30,21 @@ namespace Functional.Maybe
 		{
 			var res = await @this;
 			return res.HasValue ? res.Value : orElse();
+		}
+
+		public static async Task<TR> MatchAsync<T, TR>(this Maybe<T> @this,
+			Func<T, Task<TR>> res,
+			Func<Task<TR>> orElse) => @this.HasValue
+			? await res(@this.Value)
+			: await orElse();
+
+		public static async Task DoAsync<T>(this Maybe<T> @this,
+			Func<T, Task> res)
+		{
+			if (@this.HasValue)
+			{
+				await res(@this.Value);
+			}
 		}
 	}
 }
